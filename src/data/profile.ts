@@ -1,10 +1,10 @@
 export const profile = {
   name: 'Alban L.',
-  baseline: 'Développeur JavaScript / TypeScript. Articles, talks et notes de terrain.',
+  baseline: 'Ingénieur logiciel. Articles, talks et notes de terrain.',
   seo: {
-    title: 'Alban Lorillard — Dev JS/TS',
+    title: 'Alban Lorillard — Ingénieur logiciel - Dev Web',
     description:
-      'Articles, talks et notes de terrain sur le développement JavaScript et TypeScript.',
+      'Articles, talks et notes de terrain sur le développement web, les bonnes pratiques, les outils modernes, ou des expériences perso.',
     canonical: 'https://www.albanlorillard.fr',
   },
   links: [

@@ -49,6 +49,8 @@ Selon votre configuration, le « ticket de départ » — c'est-à-dire le conte
 
 Si vous dépassez la limite de la fenêtre de contexte, il faudra compresser — et ça coûte. On y reviendra.
 
+Pour donner un ordre de grandeur, de manière très approximative, 1 million de tokens représente environ 750 000 mots, soit l’équivalent d’une encyclopédie de 2 000 à 3 000 pages.
+
 ### Les tokens de sortie (Output Tokens)
 
 Les tokens de sortie sont plus concrets : une fois le contexte envoyé au LLM, celui-ci produit du contenu, qui est lui aussi facturé (5x plus cher).
@@ -75,7 +77,9 @@ C'est précisément pour ça que les fournisseurs ont mis en place du prompt cac
 
 Côté OpenAI, le cache fonctionne automatiquement, sans aucun paramètre à activer, et sans surcoût. Réduction jusqu'à 90 % du coût des tokens d'entrée sur un cache hit.
 
-Chez Anthropic, le mécanisme est très différent. Le cache doit être explicitement demandé par l'application qui appelle l'API. Anthropic facture l'écriture dans le cache (x1.25 par rapport à l'input token pour 5 min), mais la partie en cache sera facturée 90% moins cher lors des hits.
+Chez Anthropic, le mécanisme est très différent. Le cache doit être explicitement demandé par l'application qui appelle l'API. Anthropic facture l'écriture dans le cache (x1.25 par rapport à l'input token pour 5 min de cache), mais la partie en cache sera facturée 90% moins cher lors des hits.
+
+Le problème c’est que les outils Copilot CLI / OpenCode sont assez obscure sur la partie “Cache”. Les modèles d’OpenAI ont donc l’air d’en bénéficier par défaut, ce qui ne semble pas le cas des modèles d’Anthropic. Vous pouvez regarder le [paramètre setCacheKey](https://opencode.ai/docs/config/#mod%C3%A8les) pour Opencode / Anthropic
 
 ## Les bonnes pratiques à mettre en place dès maintenant
 
@@ -87,11 +91,11 @@ C'est sûrement l'action la plus rapide et la plus efficace. [RTK](https://githu
 
 L'outil est livré avec une instruction à ajouter à votre agent pour lui signifier : « N'utilise plus les commandes par défaut, utilise celles de RTK. » Ainsi, l'agent ne fera plus de `ls` pour lister les fichiers d'un dossier, mais un `rtk ls`, dont la sortie est optimisée en tokens.
 
-Si vous utilisez des outils pas encore pris en charge par ces CLI-proxy, rien ne vous empêche d'ajouter dans votre `package.json` des scripts optimisés pour l'IA.
+Si vous utilisez des outils pas encore pris en charge par ces CLI-proxy, rien ne vous empêche d’ajouter dans votre `package.json` (ou autre gestionnaire de paquets) des scripts optimisés pour l’IA — c’est-à-dire en utilisant des arguments qui ont des sorties moins verbeuses quand disponible — et d’ajouter une instruction pour en favoriser l’usage.
 
 ### 2 — Optimiser vos Outputs avec une instruction globale
 
-Il ne faut pas en abuser, et la garder simple, mais il est important d'en avoir une concise, car elle influencera l'ensemble de vos sessions futures. On parle ici d'une instruction générale (selon l'outil : `~/.config/opencode/AGENTS.md` pour OpenCode, `~/.copilot/copilot-instructions.md` pour Copilot…). Ce contexte est chargé à chaque prompt — ce sont donc des tokens d'entrée consommés d'office.
+Il ne faut pas en abuser, et la garder simple, mais il est important d’en avoir une concise, car elle influencera l’ensemble de vos sessions futures. On parle ici d’une instruction générale (selon l’outil : `~/.config/opencode/AGENTS.md` pour OpenCode, `~/.copilot/copilot-instructions.md` pour Copilot…). Ce contexte est chargé à chaque prompt — ce sont donc des tokens d’entrée consommés d’office. On peut le voir comme un malus d’entrée, mais qui permet de gagner sur les tokens de sortie (ceux qui coûtent le plus) : en évitant, par exemple, que les agents prennent trop de libertés en effectuant des tâches non demandées et coûteuses, en répondant de façon directe, ou en tournant en rond de façon autonome.
 
 Voici un exemple :
 
@@ -114,61 +118,85 @@ Dès que vous le modifiez, gardez en tête le ratio : « Ce que ça va me coûte
 
 ### 3 — Optimiser les outputs avec Caveman
 
-[Caveman](https://github.com/JuliusBrussee/caveman) fonctionne sous forme d'une skill utilisable avec n'importe quel outil IA. Il transforme vos phrases en outputs plus ou moins condensés. Il existe plusieurs modes : « full », « ultra ».
+[Caveman](https://github.com/JuliusBrussee/caveman) fonctionne sous forme d'une skill utilisable avec n'importe quel outil IA. Il transforme vos phrases en outputs plus ou moins condensés. Il existe plusieurs modes : « full », « ultra ». Comme on a vu précédemment que l’historique de conversation était envoyé à chaque fois, cela permet donc d’optimiser votre contexte à chaque échange.
 
 ![https://github.com/JuliusBrussee/caveman](https://miro.medium.com/v2/resize:fit:1400/1*79D2eCndvJTl8xMfn0krww.png)
 
-Comme on a vu précédemment que l'historique de conversation était envoyé à chaque fois, cela permet donc d'optimiser votre contexte à chaque échange.
+Vous réglez donc la graduation, si vous utilisez le mode ultra, les réponses seront moins “lisible” car très compacté, ce qui peut représenter une charge cognitive supplémentaire pour vous.
 
 ### 4 — Utiliser les bons modèles pour les bonnes tâches
 
-C'est du bon sens, mais n'utilisez pas les modèles les plus puissants (Claude Opus en « High », GPT-5 en « Extra-High »…) pour tout et n'importe quoi.
+C’est du bon sens, mais n’utilisez pas les modèles les plus puissants (Claude Opus en « High », GPT-5 en « Extra-High »…) pour tout et n’importe quoi. 
 
-Personnellement, mon terminal a toujours un onglet OpenCode ouvert sur Gemini Flash (en mode Low ou Medium), nommé « Q&A », pour des questions simples. Si votre prompt est précis, concis, délimité, sans fioriture et sans contexte externe, vous disposez d'une solution quasi gratuite.
+Claude Sonnet, souvent considéré comme le bon équilibre, peut lui aussi être excessif selon le besoin. Ne négligez pas les modèles légers — Gemini Flash, Claude Haiku, GPT-mini — pour les tâches simples.
 
-**Méthodologie Architecte/Développeur**
+#### Abusez des modèles légers.
+Personnellement, mon terminal a toujours un onglet OpenCode ouvert sur Gemini Flash (en mode Low ou Medium), nommé « Q&A » (questions & réponses), pour des questions simples, d’ordre général, ou pour des tâches sans complexité. Si votre prompt est précis, concis, délimité, sans fioriture et sans contexte externe (c’est-à-dire que vous ne demandez pas à l’agent d’aller chercher du contexte en dehors de votre prompt), vous disposez d’une solution quasi gratuite. Comme ce sont des modèles moins performants, n’hésitez pas à démarrer une nouvelle session (/new) pour chaque nouvelle question ou tâche.
 
-À l'opposé, et contre-intuitivement, il vaut parfois mieux utiliser Claude Opus 4.6 pour préparer un plan précis lorsque la tâche est complexe, plutôt que de partir directement avec Claude Sonnet et devoir le corriger à tout bout de champ. C'est la stratégie de l'architecte (Opus) et du développeur exécutant (Sonnet).
+#### Méthodologie Architecte/Développeur**
 
-**Socratic Prompting**
+À l’opposé, et contre-intuitivement, il vaut parfois mieux utiliser Claude Opus 4.6 pour préparer un plan précis lorsque la tâche est complexe et nécessite une bonne analyse du code (plusieurs fichiers à lire), plutôt que de partir directement avec Claude Sonnet et devoir le corriger à tout bout de champ. Une fois le plan établi, vous pouvez redescendre sur un modèle moins coûteux. C’est la stratégie de l’architecte (Opus) et du développeur exécutant (Sonnet).
 
-Ne sous-estimez pas le temps à investir dans la conception d'un plan. La méthode du « Socratic Prompting » consiste à demander à l'IA de vous interroger sans relâche jusqu'à atteindre une compréhension robuste et sans ambiguïté.
+L’objectif est d’éviter d’utiliser un modèle sous-performant dés le début, ce qui risquerait de vous entraîner dans un **biais de rétroaction** : devoir corriger après conception le code produit par l’IA. « Au fait, tu as fait ça, mais je préfère que ce soit comme ça. » Chaque requête corrective augmente le contexte en entrée, génère de nouveaux tokens de sortie, entraîne parfois des compressions (qui coûtent aussi), et vous voilà dans une boucle feedback / implémentation qui peut s’avérer coûteuse in fine.
+
+#### Socratic Prompting**
+
+Ne sous-estimez pas le temps à investir dans la conception d’un plan pour éviter de tomber dans ce biais de rétroaction. La méthode du « Socratic Prompting » consiste à demander à l’IA de vous interroger sans relâche jusqu’à atteindre une compréhension robuste et sans ambiguïté. (Il est possible d’utiliser une skill pour ce genre de cas : [exemple](https://github.com/roy-reshef/socratic-ai-prompt-skill/tree/main)).
 
 ![Utilisation d'une skill type "Socratic Prompting" pour réaliser un plan.](https://miro.medium.com/v2/resize:fit:1400/1*mRcTmWAJhAGpSvCfTJbtfQ.png)
 
+#### Mode auto (Utilisateurs de Copilot)
+
+Lors de l’écriture de l’article le mode Auto de Copilot ne choisi pas le meilleur modèle (c’est prévu dans la road map du produit), mais permet d’étaler la charge pour éviter le rate limit et diminuer la latence. Il est donc mieux de maitriser le modèle à utiliser.
+
 ### 5 — Utiliser les bons variants au bon moment (high, extra-high, medium, low…)
+
+Vos modèles disposent de plusieurs variants : Low, Medium, High, Extra-High. Ils ne sont pas tous disponibles pour tous les modèles.
 
 Plus un variant est élevé, plus on lui demande de réfléchir, plus la réponse sera lente mais précise, et plus le contexte fourni en entrée sera exploité.
 
-En mode « High », on consomme davantage de tokens de sortie, car ceux-ci se composent de deux éléments :
+Globalement, que vous soyez en mode « Low » ou « High », le contexte en entrée (votre prompt, vos fichiers…) est identique. Cependant, en mode « High », on consomme davantage de tokens de sortie, car ceux-ci se composent de deux éléments :
 
-- La réponse effective qui s'affiche dans le terminal une fois la tâche accomplie
-- Les tokens de réflexion, qui permettent de voir en direct ce que le LLM est en train de faire
+- La réponse effective qui s’affiche dans le terminal une fois la tâche accomplie.
+- Les tokens de réflexion (moins mis en avant dans les outils), qui permettent de voir en direct ce que le LLM est en train de faire. Plus le niveau est élevé, plus le budget de réflexion alloué est important, et plus les tokens consommés en sortie sont donc nombreux.
+Il est donc important de calibrer le bon niveau pour la bonne tâche. Pour une tâche simple (correction, renommage, formatage, code trivial), utilisez « Low » : vous aurez moins de tokens de sortie facturés, et le résultat sera tout à fait acceptable. À l’inverse, utiliser « Low » sur une tâche conséquente dégradera la précision : votre contexte ne sera pas pleinement exploité, et le modèle risque d’inventer des détails ou de prendre des raccourcis qu’il faudra corriger.
 
 Le rapport peut atteindre ×10 entre les tokens de sortie facturés en « Low » et en « High ». Le mode « Medium » offre souvent un bon équilibre.
 
+Je vous conseille [cet article de MindStudio](https://www.mindstudio.ai/blog/claude-code-effort-levels-explained), qui vous aide à choisir le bon niveau d’effort et à détecter quand changer de variant.
+
 ### 6 — Des MCPs : oui, quand c'est nécessaire — et pas tous activés en même temps
 
-Vos tokens d'entrée contiennent une partie « system prompt », envoyée à chaque message. Ce system prompt inclut le catalogue de vos MCPs avec leurs descriptions, leurs paramètres attendus… Plus vous avez d'outils activés, plus cette partie fixe sera volumineuse.
+Vos tokens d’entrée contiennent une partie « system prompt », envoyée à chaque message. Ce system prompt inclut le catalogue de vos MCPs avec leurs descriptions, leurs paramètres attendus… Plus vous avez d’outils activés, plus cette partie fixe sera volumineuse.
+
+Certains MCPs, disposant de nombreuses fonctions, adoptent une stratégie de « discovery » : ils exposent une fonction permettant de découvrir les autres. C’est légèrement plus optimisé, mais une fois les fonctions découvertes, elles s’ajoutent à l’historique de la session et sont donc réenvoyées à chaque appel suivant.
 
 Pour désactiver :
 
 - Sur Opencode : `/mcps` puis espace sur les mcps
 - Sur Copilot CLI : `/mcp disable <service>`
 
+L’usage judicieux des MCPs reste bien sûr bénéfique lorsqu’il est justifié : l’agent évitera, par exemple, de récupérer une page entière et de recevoir un dump HTML pour en extraire une information, si un MCP la fournit directement, de manière concise et structurée.
+
+
+
 ### 7 — Compression, reprise de session, nouvelle conversation
 
-La compression évite de dépasser le maximum de tokens en entrée en réalisant une synthèse du contexte accumulé. Elle se déclenche souvent automatiquement dans les outils (aux alentours de 80 %). On peut la déclencher manuellement avec `/compact`.
+La compression évite de dépasser le maximum de tokens en entrée en réalisant une synthèse du contexte accumulé. Elle se déclenche souvent automatiquement dans les outils (aux alentours de 80 %) ; à défaut, on tomberait dans un « overcontext » avec des résultats peu précis. On peut la déclencher manuellement avec `/compact`.
 
-Pour réaliser cette synthèse, un appel à un LLM est nécessaire. Résultat : on paie des tokens d'entrée et de sortie à chaque compression.
+Pour réaliser cette synthèse, un appel à un LLM est nécessaire. Résultat : on paie des tokens d’entrée et de sortie à chaque compression. Sachant qu’on envoie environ 80 % d’un contexte, cela représente un volume non négligeable de tokens. De plus, côté Copilot CLI ou OpenCode, c’est le modèle actuellement utilisé dans la session qui effectue la compression — compresser sous Opus peut faire mal à la facture.
 
-La question à se poser est donc : « Dois-je démarrer une nouvelle session, ou le contexte accumulé jusqu'ici mérite-t-il d'être conservé ? »
+La question à se poser est donc : « Dois-je démarrer une nouvelle session, ou le contexte accumulé jusqu’ici mérite-t-il d’être conservé ? »
+
+Si je prends une session ou je souhaite envoyer une nouvelle fonctionnalité complexe, que je veux envoyer en pull request, je vais surement faire un plan (sous Opus / high), lancer le développement (sous Sonnet / Medium) et arriver à un besoin de compression après 2 ou 3 itérations.
 
 Quelques exemples concrets :
-- Plusieurs linters en échec : le contexte précédent ne me sert à rien. Je lance Claude Haiku dans une nouvelle session.
+- Plusieurs linters en échec : le contexte précédent ne me sert à rien (la sortie de la commande de lint est suffisamment explicite). Je lance Claude Haiku dans une nouvelle session.
 - Plan terminé, tests unitaires oubliés : le contexte est important, je continue la session.
 
-Vous pouvez désactiver la compression automatique sur OpenCode :
+En pratique, au-delà de deux ou trois compressions dans une même session, le confort se dégrade et le coût augmente. Il n’est pas absurde de repartir sur une session propre, en lui fournissant le PLAN.md de la session précédente et en expliquant où vous en êtes.
+
+Sachez également que vous pouvez désactiver la compression automatique sur OpenCode, ou la déclencher plus tôt. Vous éviterez ainsi des compressions non souhaitées lorsque vous n’avez pas l’intention de prolonger la session. (Cette option ne semble pas être disponible sous Copilot CLI.) ([doc OpenCode](https://opencode.ai/docs/config/#compactage))
 
 ```json
 {
@@ -180,14 +208,15 @@ Vous pouvez désactiver la compression automatique sur OpenCode :
   }
 }
 ```
+Pour allez plus loin, [la doc copilot sur le context management](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management#using-long-running-sessions) donne son point de vue sur quand démarrer une nouvelle session, quand réutiliser.
 
 ### 8 — Utiliser du texte plutôt que des médias
 
-Sans trop s'étendre : le texte sera toujours plus économique et plus précis qu'une image. Si vous êtes dans la vibe du « Mouth Coding » (coder à la voix), utilisez d'abord un outil de speech-to-text local comme [Handy](https://github.com/handy-ai/handy). Pour développer une maquette, préférez un MCP dédié (MCP Figma, par exemple).
+Sans trop s'étendre : le texte sera toujours plus économique et plus précis qu'une image. Si vous êtes dans la vibe du « Mouth Coding » (coder à la voix), utilisez d'abord un outil de speech-to-text local comme [Handy](https://github.com/handy-ai/handy). Pour développer une maquette, préférez un MCP dédié (MCP Figma, par exemple) qu'une image dans le prompt.
 
 ## Conclusion
 
-Finalement, ces évolutions de tarification devraient peut-être nous amener à réfléchir plus largement à notre usage quotidien de l'IA. Pourquoi faire tourner des data centers à plein régime pour tout et n'importe quoi ? Les conséquences environnementales, notamment sur la consommation d'eau et l'accaparement des ressources, doivent continuellement nous amener à nous interroger sur le quand et le pourquoi de l'usage de l'IA. Utilisez-la en conscience. Et la meilleure économie de tokens restera toujours le prompt que vous n'enverrez pas.
+Finalement, ces évolutions de tarification devraient peut-être nous amener à réfléchir plus largement à notre usage quotidien de l’IA. Pourquoi faire tourner des data centers à plein régime pour tout et n’importe quoi — et notamment pour des tâches simple qu’on faisait très bien sans IA auparavant ? Les conséquences environnementales, notamment sur la consommation d’eau et l’accaparement des ressources, doivent continuellement nous amener à nous interroger sur le quand et le pourquoi de l’usage de l’IA. Utilisez-la en conscience. Et la meilleure économie de tokens restera toujours le prompt que vous n’enverrez pas.
 
 ## Sources
 
