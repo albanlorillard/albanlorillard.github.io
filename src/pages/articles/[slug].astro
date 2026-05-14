@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import { profile } from '../../data/profile';
+import '../../styles/global.css';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('items', ({ data }) => data.kind === 'article');
+  const allItems = await getCollection('items');
+  return articles.map((article) => {
+    const talk = article.data.group
+      ? allItems.find((i) => i.data.group === article.data.group && i.data.kind === 'talk')
+      : undefined;
+    return {
+      params: { slug: article.slug },
+      props: { article, talk },
+    };
+  });
+}
+
+const { article, talk } = Astro.props;
+const { Content } = await article.render();
+const { title, date, tags, mediumUrl, summary } = article.data;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={summary} />
+    <meta property="og:title" content={`${title} — ${profile.name}`} />
+    <meta property="og:description" content={summary} />
+    <meta property="og:url" content={`${profile.seo.canonical}/articles/${article.slug}`} />
+    <meta property="og:type" content="article" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={`${profile.seo.canonical}/articles/${article.slug}`} />
+    <title>{title} — {profile.name}</title>
+  </head>
+  <body>
+    <header class="article-header">
+      <a href="/" class="back-link">← {profile.name}</a>
+      <div class="article-meta">
+        <time datetime={date}>{date}</time>
+        <span class="item__badge item__badge--article">article</span>
+      </div>
+      <h1 class="article-title">{title}</h1>
+      <p class="article-summary">{summary}</p>
+      <div class="item__tags" aria-label="Tags">
+        {tags.map((tag) => <span>{tag}</span>)}
+      </div>
+    </header>
+
+    <main class="prose">
+      <Content />
+    </main>
+
+    {talk && (
+      <aside class="talk-callout">
+        <span class="talk-callout__label">Slides associées</span>
+        <a href={talk.data.url} class="talk-callout__link">
+          {talk.data.title} →
+        </a>
+      </aside>
+    )}
+
+    {mediumUrl && (
+      <footer class="article-footer">
+        <a href={mediumUrl} target="_blank" rel="noopener noreferrer" class="medium-link">
+          Lire l'original sur Medium →
+        </a>
+      </footer>
+    )}
+  </body>
+</html>

@@ -1,0 +1,126 @@
+---
+import { getCollection } from 'astro:content';
+import { profile } from '../data/profile';
+import '../styles/global.css';
+
+const allItems = await getCollection('items');
+
+// Grouper les items par `group`, les items sans group restent seuls
+type Item = (typeof allItems)[number];
+
+interface GroupedItem {
+  date: string;
+  title: string;
+  summary: string;
+  tags: string[];
+  entries: { kind: 'article' | 'talk'; url: string; label: string }[];
+}
+
+const grouped: GroupedItem[] = [];
+const seen = new Set<string>();
+
+const sorted = allItems.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+for (const item of sorted) {
+  const g = item.data.group;
+
+  if (g) {
+    if (seen.has(g)) continue;
+    seen.add(g);
+
+    const members = sorted.filter((i) => i.data.group === g);
+    const main = members.find((i) => i.data.kind === 'article') ?? members[0];
+    const tags = [...new Set(members.flatMap((i) => i.data.tags))];
+
+    grouped.push({
+      date: main.data.date,
+      title: main.data.title,
+      summary: main.data.summary,
+      tags,
+      entries: members.map((i) => ({
+        kind: i.data.kind,
+        url: i.data.url,
+        label: i.data.kind === 'article' ? 'article' : 'talk',
+      })),
+    });
+  } else {
+    grouped.push({
+      date: item.data.date,
+      title: item.data.title,
+      summary: item.data.summary,
+      tags: item.data.tags,
+      entries: [{ kind: item.data.kind, url: item.data.url, label: item.data.kind }],
+    });
+  }
+}
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={profile.seo.description} />
+    <meta property="og:title" content={profile.seo.title} />
+    <meta property="og:description" content={profile.seo.description} />
+    <meta property="og:url" content={profile.seo.canonical} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href={profile.seo.canonical} />
+    <title>{profile.seo.title}</title>
+  </head>
+  <body>
+    <header class="hero">
+      <h1 class="hero__name">{profile.name}</h1>
+      <p class="hero__baseline">{profile.baseline}</p>
+      <nav class="hero__links" aria-label="Liens de contact">
+        {
+          profile.links.map((link) => (
+            <a href={link.url}>{link.label}</a>
+          ))
+        }
+      </nav>
+    </header>
+
+    <main>
+      <ul class="items" role="list">
+        {
+          grouped.map((item) => (
+            <li class="item">
+              <div class="item__meta">
+                <time datetime={item.date}>{item.date}</time>
+                {item.entries.map((entry) => (
+                  <a
+                    href={entry.url}
+                    class={`item__badge item__badge--${entry.kind}`}
+                    target={entry.url.startsWith('http') ? '_blank' : undefined}
+                    rel={entry.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  >
+                    {entry.label}
+                  </a>
+                ))}
+              </div>
+              <h2 class="item__title">
+                <a
+                  href={item.entries[0].url}
+                  target={item.entries[0].url.startsWith('http') ? '_blank' : undefined}
+                  rel={item.entries[0].url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                >
+                  {item.title}
+                </a>
+              </h2>
+              <p class="item__summary">{item.summary}</p>
+              <div class="item__tags" aria-label="Tags">
+                {item.tags.map((tag) => (
+                  <span>{tag}</span>
+                ))}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA : La fête est finie — 8 recommandations pour économiser vos tokens</title>
+
+  <!-- Reveal.js core -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section id="title" class="section-divider" data-state="is-section-divider">
+        <h1>IA : La fête est finie</h1>
+  <p class="text-xl">8 recommandations pour économiser vos tokens</p>
+  <p class="text-muted">Alban Lorillard · GitHub Copilot · LLM · Productivité</p>
+      </section>
+
+      <section id="slide-2">
+        <h2>Contexte — Pourquoi ça change tout ?</h2>
+      <div class="content">
+        <div style="display:grid; grid-template-columns: 1.4fr 0.8fr; gap: 2rem; align-items:start;">
+          <div>
+            <ul class="text-lg">
+              <li>GitHub Copilot passe à la <strong>facturation à l'usage</strong>, au token consommé, dès juin.</li>
+              <li>Les modèles deviennent plus performants, mais aussi <strong>plus coûteux</strong>.</li>
+              <li>L'ère de l'expérimentation sans limite est terminée.</li>
+              <li>Économiser des tokens, c'est aussi moins d'hallucinations, plus d'efficacité et une empreinte énergétique réduite.</li>
+            </ul>
+          </div>
+          <div class="card-accent">
+            <p class="text-2xl"><strong>Chaque token compte. Littéralement.</strong></p>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <section id="divider-1" class="section-divider" data-state="is-section-divider">
+        <h1>Les Tokens</h1>
+      <p>Comprendre la mécanique pour mieux économiser</p>
+      </section>
+
+      <section>
+        <section id="slide-4-1">
+          <h2>Qu'est-ce qu'un token ?</h2>
+        <div class="content">
+          <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; align-items:center;">
+            <div>
+              <ul class="text-lg">
+                <li>Le token est la plus petite unité linguistique analysée par l'IA.</li>
+                <li>Un mot représente souvent <strong>1 à 2 tokens</strong> ; un caractère spécial ou un signe de ponctuation vaut souvent <strong>1 token</strong>.</li>
+                <li>Un même prompt ne produit pas le même nombre de tokens selon le modèle.</li>
+                <li>Exemple : un même prompt peut coûter <strong>19 tokens</strong> sur GPT-5, <strong>35</strong> sur Opus 4.7 et <strong>22</strong> sur Sonnet 4.6.</li>
+              </ul>
+              <div class="card">
+                <p class="text-xl"><strong>Plus un modèle est performant, plus il consomme de tokens.</strong></p>
+              </div>
+            </div>
+            <div>
+              <img class="slide-img" src="1_cS2Mh14ggUZO3GxeKPrNGQ.png" alt="OpenAI Tokenizer">
+            </div>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://platform.openai.com/tokenizer" target="_blank">platform.openai.com/tokenizer</a>
+          &nbsp;·&nbsp;
+          <a href="https://www.claudetokenizer.com/" target="_blank">claudetokenizer.com</a>
+          &nbsp;·&nbsp;
+          <a href="https://platform.claude.com/docs/en/about-claude/models/overview" target="_blank">Comparaison des modèles Anthropic</a>
+        </div>
+        </section>
+        <section id="slide-4-2">
+          <h2>Les tokens d'entrée (Input)</h2>
+        <div class="content">
+          <p class="text-lg">Tout ce qui est envoyé au modèle à chaque requête</p>
+          <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; align-items:start;">
+            <div>
+              <p><span class="token-badge input"><strong>Input tokens</strong></span></p>
+              <ol class="text-lg">
+                <li>Votre prompt, c'est-à-dire la requête actuelle.</li>
+                <li>Les instructions personnalisées, comme AGENTS.md ou .instructions.md.</li>
+                <li>L'historique de la conversation.</li>
+                <li>Le contexte implicite de l'IDE, comme les fichiers ouverts ou l'état Git.</li>
+                <li>Les sorties des outils, comme le terminal ou les logs.</li>
+              </ol>
+              <div class="card-accent">
+                <p><strong>Dans mon cas, on voit dans l'illustration que Copilot CLI démarre avec 70 000 tokens de contexte avant la première question.</strong></p>
+              </div>
+            </div>
+            <div>
+              <img class="slide-img" src="1_9UVv8AnHaEgNJVKQBUiMaQ.png" alt="Contexte initial Copilot CLI">
+            </div>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management" target="_blank">docs.github.com — Copilot CLI context management</a>
+        </div>
+        </section>
+        <section id="slide-4-3">
+          <h2>À chaque échange, tout le contexte repart</h2>
+          <div class="content" style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <img class="slide-img" src="context.png" alt="Fenêtre de contexte — remplissage progressif"
+                 style="max-width:92%; max-height:400pt; object-fit:contain;">
+          </div>
+          <div class="footnote">
+            L'IA n'a <strong>aucune mémoire</strong> — prompt, historique, fichiers ouverts, logs CLI : <strong>tout est renvoyé à chaque requête</strong>. La fenêtre se remplit vite.
+          </div>
+        </section>
+        <section id="slide-4-4">
+          <h2>Les tokens de sortie (Output)</h2>
+          <div class="content">
+            <p class="text-lg">Une fois le contexte envoyé, le LLM produit du contenu — lui aussi facturé.</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items:start;">
+              <div>
+                <p><span class="token-badge output"><strong>Output tokens</strong></span></p>
+                <ul class="text-lg">
+                  <li>Le <strong>code modifié</strong> dans vos fichiers.</li>
+                  <li>Les <strong>réponses affichées</strong> en console.</li>
+                  <li>Les <strong>tokens de réflexion</strong> — ce que le modèle "pense" avant de répondre (visible en console) — sont aussi facturés comme output.</li>
+                </ul>
+              </div>
+              <div>
+                <div class="card-accent">
+                  <p><strong>Low / Medium / High</strong></p>
+                  <ul>
+                    <li>Le contexte d'<strong>entrée est identique</strong> quel que soit le mode.</li>
+                    <li>En mode <strong>High</strong>, le budget de réflexion est plus grand → plus de tokens de sortie.</li>
+                    <li>Le rapport peut atteindre <strong>×10</strong> entre Low et High.</li>
+                    <li>Pour du renommage, du formatage ou du code trivial : utilisez <strong>Low</strong>.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="slide-4-5">
+          <h2>Prompt Caching — OpenAI vs Anthropic</h2>
+          <div class="content">
+            <p class="text-lg">Tant que le <strong>début de votre prompt reste identique</strong>, cette portion peut être servie depuis un cache à tarif très réduit.</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items:start;">
+              <div class="card">
+                <p><strong>🟢 OpenAI — automatique</strong></p>
+                <ul>
+                  <li>Aucune activation requise, <strong>sans surcoût d'écriture</strong>.</li>
+                  <li>Cache hit : <strong>−90 % sur les input tokens</strong>, −80 % de latence.</li>
+                  <li>TTL : 5–10 min (jusqu'à 1 h en off-peak, 24 h sur GPT-5+).</li>
+                  <li>✅ Les modèles OpenAI dans Copilot CLI / OpenCode <strong>en bénéficient par défaut</strong>.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <p><strong>🔶 Anthropic — explicite</strong></p>
+                <ul>
+                  <li>Activation via <code>cache_control</code> dans l'API (ou "automatic caching" récent).</li>
+                  <li>Écriture facturée <strong>×1,25</strong> — lecture à <strong>−90 %</strong>.</li>
+                  <li>Les outils CLI sont <strong>peu transparents</strong> sur l'activation du cache Anthropic.</li>
+                </ul>
+                <div style="margin-top:10pt;">
+                  <p><strong>💡 Structurez toujours</strong> : contenu <em>statique</em> en premier (system prompt, instructions, contexte), variable à la fin.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footnote">
+            <a href="https://platform.openai.com/docs/guides/prompt-caching" target="_blank">OpenAI — Prompt Caching</a>
+            &nbsp;·&nbsp;
+            <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching" target="_blank">Anthropic — Prompt Caching</a>
+          </div>
+        </section>
+      </section>
+
+      <section id="divider-2" class="section-divider" data-state="is-section-divider">
+        <h1>8 Recommandations</h1>
+        <p>Des actions concrètes pour réduire votre consommation de tokens</p>
+      </section>
+
+      <section id="slide-6">
+        <h2>Optimiser les outputs CLI</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 01</p>
+          <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:25px; align-items:center;">
+            <div>
+              <p class="text-lg">RTK et Snip s'intercalent entre vos commandes CLI et votre agent pour réduire immédiatement les sorties inutiles.</p>
+              <ul>
+                <li><strong><code>rtk ls</code></strong> produit une sortie plus compacte que <code>ls</code>, tout en restant compréhensible.</li>
+                <li>Ajoutez une instruction globale pour que l'agent utilise les commandes RTK à la place des commandes shell classiques.</li>
+                <li><strong>Snip</strong> applique le même principe en Go, comme alternative plus discrète.</li>
+              </ul>
+              <p class="text-muted">Astuce : créez aussi des scripts npm optimisés pour l'IA dans <code>package.json</code>.</p>
+            </div>
+            <div>
+              <img class="slide-img" src="1_IvHCWIoYGhFKEcm5-c8l6A.png" alt="RTK CLI">
+            </div>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://github.com/rtk-ai/rtk" target="_blank">github.com/rtk-ai/rtk</a>
+        </div>
+      </section>
+
+      <section id="slide-7">
+        <h2>Une instruction globale bien calibrée</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 02</p>
+          <div style="display:grid; grid-template-columns:1fr 2fr; gap:2rem; align-items:start;">
+            <div>
+              <p class="text-lg">Un coût fixe par requête — mais un gain sur 100+ sessions.</p>
+              <div class="card-accent" style="margin-top:1rem;">
+                <p><strong>Fichier :</strong><br><code>~/.copilot/copilot-instructions.md</code></p>
+              </div>
+              <p style="margin-top:1rem;" class="text-muted">Chargé à chaque prompt → tokens d'entrée fixes, mais réduit les allers-retours et les tokens de <strong>sortie</strong>.</p>
+            </div>
+            <div>
+              <pre style="background:#161b22; border:1pt solid #30363d; border-radius:6pt; padding:14pt; font-size:10pt; line-height:1.5; overflow:hidden; color:#e6edf3; text-align:left; white-space:pre-wrap; margin:0;"><code style="font-family:'Cascadia Code',monospace; background:transparent;"># Instructions personnelles
+
+## Language
+- Réponds toujours en **français**
+- Direct et concis, sans fioritures, sans émojis.
+
+## Planification
+- Tâche &gt; 2 fichiers → propose un plan via `/plan` et attends ma validation.
+
+## Contrôle Git — règles strictes
+- **Ne jamais committer automatiquement.**
+- **Ne jamais pusher.** Jamais, sous aucun prétexte.
+- Ne jamais exécuter de commande git sans me le signaler.
+
+## Actions interdites sans validation
+- Tout déploiement (Terraform, Lambda, infra).
+- Tout appel API vers un environnement de production.
+- Toute suppression de fichiers ou données.
+
+## Périmètre des modifications
+- Reste dans le scope demandé.
+- Signale un problème connexe mais ne le corrige pas.
+
+## Gestion des blocages
+- Bloqué après 2 tentatives → stop, rends-moi la main.</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="slide-8">
+        <h2>Compresser les outputs (Caveman)</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 03</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; align-items:center;">
+            <div>
+              <p class="text-lg">Caveman est une skill installable dans n'importe quel outil IA pour condenser les réponses sans perdre l'essentiel.</p>
+              <ul>
+                <li><strong>Modes</strong> : lite, full et ultra, avec des variantes wenyan pour aller encore plus loin.</li>
+                <li><strong>Gain estimé</strong> : environ 75% de tokens en moins sur les sorties.</li>
+              </ul>
+              <div class="stat-box">
+                <p class="stat-value">~75%</p>
+                <p class="stat-label">de tokens économisés en sortie</p>
+              </div>
+              <p class="text-muted">Attention : le mode ultra réduit fortement le volume, mais augmente la charge cognitive côté humain.</p>
+            </div>
+            <div>
+              <img class="slide-img" src="1_79D2eCndvJTl8xMfn0krww.png" alt="Caveman mode">
+            </div>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://github.com/JuliusBrussee/caveman" target="_blank">github.com/JuliusBrussee/caveman</a>
+        </div>
+      </section>
+
+      <section>
+        <section id="slide-9-1">
+          <h2>Les bons modèles pour les bonnes tâches</h2>
+          <div class="content">
+            <p class="reco-number">Recommandation 04</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
+              <div class="card">
+                <h3><i class="fa-solid fa-bolt"></i> Tâches simples</h3>
+                <p><strong>Gemini Flash / Haiku / GPT-4.1 mini</strong></p>
+                <p>Questions rapides, Q&amp;A, debug ponctuel, reformulation.</p>
+              </div>
+              <div class="card">
+                <h3><i class="fa-solid fa-code"></i> Développement courant</h3>
+                <p><strong>Claude Sonnet / GPT-4.1</strong></p>
+                <p>Le meilleur équilibre entre qualité, vitesse et coût pour coder au quotidien.</p>
+              </div>
+              <div class="card">
+                <h3><i class="fa-solid fa-brain"></i> Planification complexe</h3>
+                <p><strong>Claude Opus (High)</strong></p>
+                <p>Utilisez-le pour cadrer le plan, puis déléguez l'exécution à Sonnet.</p>
+              </div>
+            </div>
+            <p class="text-muted">Biais de rétroaction : corriger = nouveau contexte = nouveaux tokens. ↓ Voir les méthodes</p>
+          </div>
+        </section>
+
+        <section id="slide-9-2">
+          <h2>Méthodologie Architecte / Développeur</h2>
+          <div class="content">
+            <p class="reco-number">Recommandation 04</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; align-items:start;">
+              <div>
+                <p class="text-lg">Contre-intuitif mais efficace : utiliser le <strong>modèle le plus puissant pour planifier</strong>, puis un modèle plus léger pour exécuter.</p>
+                <div style="display:grid; grid-template-columns:1fr; gap:15px; margin-top:15px;">
+                  <div class="card-accent">
+                    <p><strong><i class="fa-solid fa-drafting-compass"></i> Architecte</strong> — Claude Opus High</p>
+                    <p class="text-muted">Analyse le code, produit un plan précis et détaillé.</p>
+                  </div>
+                  <div class="card-accent">
+                    <p><strong><i class="fa-solid fa-hammer"></i> Développeur</strong> — Claude Sonnet / GPT-4.1</p>
+                    <p class="text-muted">Exécute le plan étape par étape, au moindre coût.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="text-xl"><i class="fa-solid fa-triangle-exclamation"></i> Biais de rétroaction</h3>
+                <p>Un modèle sous-performant produit du code à corriger.</p>
+                <p>Chaque correction :</p>
+                <ul>
+                  <li>Augmente le contexte en entrée</li>
+                  <li>Génère de nouveaux tokens de sortie</li>
+                  <li>Crée un effet boule de neige sur la facture</li>
+                </ul>
+                <p class="text-muted">Mieux vaut payer plus cher le plan que corriger indéfiniment l'exécution.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="slide-9-3">
+          <h2>Socratic Prompting</h2>
+          <div class="content">
+            <p class="reco-number">Recommandation 04</p>
+            <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:30px; align-items:start;">
+              <div>
+                <p class="text-lg">Demandez à l'IA de vous <strong>interroger avant d'agir</strong> plutôt que de foncer tête baissée.</p>
+                <div class="card" style="margin-top:15px;">
+                  <p><strong>Comment ça marche ?</strong></p>
+                  <ul>
+                    <li>Dites à l'IA : <em>"Pose-moi les questions nécessaires pour bien comprendre le besoin avant de proposer quoi que ce soit."</em></li>
+                    <li>L'IA identifie les zones d'ombre et les hypothèses implicites.</li>
+                    <li>Vous répondez → le plan est bien mieux cadré.</li>
+                  </ul>
+                </div>
+                <div class="card-accent" style="margin-top:15px;">
+                  <p><strong>Résultat :</strong> moins de corrections, moins de tokens, moins de tokens de réflexion perdus sur des mauvaises pistes.</p>
+                </div>
+              </div>
+              <div>
+                <img class="slide-img" src="1_mRcTmWAJhAGpSvCfTJbtfQ.png" alt="Socratic Prompting exemple">
+                <p class="text-muted" style="margin-top:8px;">Exemple d'une skill de type Socratic Prompting pour réaliser un plan.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="slide-9-4">
+          <h2>Mode auto &amp; modèles légers</h2>
+          <div class="content">
+            <p class="reco-number">Recommandation 04</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+              <div class="card">
+                <h3 class="text-xl"><i class="fa-solid fa-wand-magic-sparkles"></i> Mode auto (Copilot)</h3>
+                <p>Copilot choisit le meilleur modèle disponible selon l'<strong>intégrité du système en temps réel</strong> et les performances.</p>
+                <ul>
+                  <li>Exclut automatiquement les modèles avec un <strong>multiplicateur premium &gt; 1</strong> → pas de mauvaise surprise sur la facture.</li>
+                  <li><strong>−10 % sur le multiplicateur</strong> pour les plans payants (Chat, CLI, Cloud Agent).</li>
+                  <li>En CLI : le <strong>modèle utilisé est affiché</strong> dans le terminal à chaque réponse.</li>
+                  <li class="text-muted">À venir : sélection selon le <em>type de tâche</em>.</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="text-xl"><i class="fa-solid fa-feather"></i> Abuser des modèles légers</h3>
+                <p>Maintenez un onglet dédié aux questions simples :</p>
+                <ul>
+                  <li><strong>GPT-4.1 mini / Haiku / Gemini Flash</strong></li>
+                  <li>Q&amp;A généraux, reformulation, explication de concept</li>
+                  <li>Aucun contexte projet → très peu de tokens</li>
+                </ul>
+                <div class="card-accent" style="margin-top:12pt;">
+                  <p>Ex : un onglet OpenCode permanent sur <strong>Gemini Flash (Low)</strong> pour tout ce qui n'est pas du code.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footnote">
+            <a href="https://docs.github.com/fr/copilot/concepts/auto-model-selection" target="_blank">docs.github.com — Sélection automatique de modèle</a>
+          </div>
+        </section>
+      </section>
+
+      <section id="slide-10">
+        <h2>Calibrer les variants (Low / Medium / High)</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 05</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
+            <div class="stat-box">
+              <p class="text-xl"><strong>Low</strong></p>
+              <p class="text-lg">Tâches simples</p>
+              <p class="text-muted">Formatage, renommage, corrections triviales</p>
+              <p class="stat-value">×1</p>
+              <p class="stat-label">tokens sortie (référence)</p>
+            </div>
+            <div class="stat-box">
+              <p class="text-xl"><strong>Medium</strong></p>
+              <p class="text-lg">Développement courant</p>
+              <p class="text-muted">Bon équilibre dans la plupart des cas</p>
+              <p class="stat-value">×3</p>
+              <p class="stat-label">tokens sortie estimés</p>
+            </div>
+            <div class="stat-box">
+              <p class="text-xl"><strong>High</strong></p>
+              <p class="text-lg">Analyse complexe</p>
+              <p class="text-muted">Architecture, analyse de code, plan détaillé</p>
+              <p class="stat-value">×10</p>
+              <p class="stat-label">tokens sortie max</p>
+            </div>
+          </div>
+          <div class="card-accent">
+            <p>En mode High, les tokens de réflexion (invisibles) sont aussi facturés.</p>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://www.mindstudio.ai/blog/claude-code-effort-levels-explained" target="_blank">MindStudio — Claude Code effort levels explained</a>
+        </div>
+      </section>
+
+      <section id="slide-11">
+        <h2>MCPs — Activer seulement ce qui est nécessaire</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 06</p>
+          <p class="text-lg">Chaque MCP actif ajoute des tokens d'entrée à chaque requête via son catalogue, ses descriptions et ses paramètres.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px;">
+            <div class="card">
+              <h3 class="text-xl">À éviter</h3>
+              <ul>
+                <li>❌ Tous les MCPs activés en permanence</li>
+                <li>❌ MCPs avec beaucoup de fonctions et de descriptions</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3 class="text-xl">Bon réflexe</h3>
+              <ul>
+                <li>✅ Activer uniquement pour la tâche en cours</li>
+                <li>✅ Désactiver après usage</li>
+                <li>✅ Commande : <strong>/mcp disable &lt;service&gt;</strong> (Copilot CLI)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-accent">
+            <p>Bien utilisés, les MCPs évitent souvent des dumps HTML bruts pour extraire une information.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="slide-12">
+        <h2>Gérer les sessions et la compression</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 07</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px;">
+            <div>
+              <h3 class="text-xl">Quand démarrer une nouvelle session ?</h3>
+              <div class="card">
+                <ul>
+                  <li>✅ Linters/tests en échec (contexte précédent = inutile)</li>
+                  <li>✅ Au-delà de 2-3 compressions</li>
+                  <li>✅ Tâche sans rapport avec la précédente</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-xl">Quand continuer la session ?</h3>
+              <div class="card">
+                <ul>
+                  <li>✅ Plan en cours (contexte précieux)</li>
+                  <li>✅ Correctifs liés au contexte courant</li>
+                  <li>✅ Tests oubliés après développement</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="card-accent">
+            <p>Astuce : fournir PLAN.md en début de session propre pour transmettre l'essentiel.</p>
+          </div>
+        </div>
+        <div class="footnote">
+          <a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management" target="_blank">Copilot — Context management</a>
+        </div>
+      </section>
+
+      <section id="slide-13">
+        <h2>Texte &gt; Images &gt; Médias</h2>
+        <div class="content">
+          <p class="reco-number">Recommandation 08</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
+            <div class="card">
+              <h3 class="text-xl"><i class="fa-solid fa-microphone"></i> <strong>Speech-to-text</strong></h3>
+              <p>Mouth Coding ? Utilisez Handy (local) avant d'envoyer.</p>
+            </div>
+            <div class="card">
+              <h3 class="text-xl"><i class="fa-solid fa-image"></i> <strong>Images / Screenshots</strong></h3>
+              <p>Toujours plus coûteux que le texte — utilisez des MCP dédiés (ex: MCP Figma).</p>
+            </div>
+            <div class="card">
+              <h3 class="text-xl"><i class="fa-solid fa-file-alt"></i> <strong>Préférez le texte</strong></h3>
+              <p>Plus précis, moins coûteux, moins de tokens visuels.</p>
+            </div>
+          </div>
+          <p class="text-muted">Le bon sens s'applique : l'IA traite le texte bien mieux et moins cher.</p>
+        </div>
+      </section>
+
+      <section id="divider-3" class="section-divider" data-state="is-section-divider">
+        <h1>Conclusion</h1>
+        <p>L'usage économique de l'IA, c'est aussi un usage plus efficace</p>
+      </section>
+
+      <section id="slide-15">
+        <h2>Ce qu'il faut retenir</h2>
+        <div class="content">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; align-items:start;">
+            <div>
+              <ul class="text-lg">
+                <li>Comprendre où vont vos tokens (input, output, cache)</li>
+                <li>Calibrer modèle + variant selon la complexité</li>
+                <li>Réduire le contexte : MCPs, instruction globale, sessions propres</li>
+                <li>Favoriser le texte optimisé (RTK, Caveman, instructions)</li>
+              </ul>
+            </div>
+            <div class="card-accent">
+              <p class="text-2xl">Moins de tokens = moins d'hallucinations + moins de coûts + moins d'énergie</p>
+            </div>
+          </div>
+          <p class="footnote" style="font-size:9pt;">Par Alban Lorillard &nbsp;·&nbsp; <a href="https://github.com/rtk-ai/rtk" target="_blank">github.com/rtk-ai/rtk</a> &nbsp;·&nbsp; <a href="https://github.com/JuliusBrussee/caveman" target="_blank">github.com/JuliusBrussee/caveman</a> &nbsp;·&nbsp; <a href="https://medium.com/p/218d29fda7c1" target="_blank">Article Medium</a></p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/chart/plugin.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280,
+      height: 720,
+      margin: 0,
+      controls: true,
+      progress: true,
+      slideNumber: false,
+      hash: true,
+      transition: 'slide',
+      center: false,
+      plugins: [ RevealChart ],
+      chart: {
+        defaults: Object.assign({
+          color: 'rgba(0, 0, 0, 0.8)',
+          borderColor: 'rgba(0, 0, 0, 0.8)',
+          devicePixelRatio: 2
+        }, window.location.search.includes('export') ? { animation: false } : {})
+      }
+    });
+  </script>
+</body>
+</html>
