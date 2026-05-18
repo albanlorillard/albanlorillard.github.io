@@ -1,15 +1,13 @@
 ---
-title: "Copilot : La fête est finie. 8 recommandations pour économiser des tokens !"
+title: "Copilot : La fête est finie. 9 recommandations pour économiser des tokens !"
 kind: "article"
 date: "2026-05-14"
 url: "/articles/copilot-economiser-tokens"
 mediumUrl: "https://albanlorillard.medium.com/8-recommandations-pour-economiser-des-tokens-218d29fda7c1"
-summary: "GitHub Copilot annonce un passage à une facturation au token. Voici 8 astuces pour moins en consommer."
+summary: "GitHub Copilot annonce un passage à une facturation au token. Voici 9 recommandations pour moins en consommer."
 tags: ["Artificial Intelligence", "Github Copilot", "OpenAI", "Claude", "Information Technology"]
 group: "ia-fete-terminee"
 ---
-
-![](https://miro.medium.com/v2/resize:fit:1400/1*pCBxcH0BP6gu4Qsl32zRew.png)
 
 Alors que GitHub Copilot annonce un passage à une facturation à l'usage d'ici juin (au token consommé) et que les modèles, bien que plus performants, deviennent de plus en plus coûteux, adopter un usage économique et intelligent de l'IA devient indispensable. L'heure de l'expérimentation sans limite est révolue. Cet article vulgarise le fonctionnement des LLM sur le sujet de la consommation de tokens et propose une liste de bonnes pratiques pour réduire vos coûts. Ces méthodes favorisent également l'efficacité (moins d'hallucinations et d'allers-retours), tout en limitant l'empreinte énergétique dans les data centers.
 
@@ -61,6 +59,10 @@ Vous avez donc :
 - Les tokens de sortie pour la réponse produite en sortie de la console
 
 Mais il y a une surprise : les tokens de réflexion sont également comptabilisés comme tokens de sortie. Ce sont les sorties visibles dans la console où l'on voit le modèle travailler, se poser des questions, raisonner… Nous verrons plus loin que les variantes « High » peuvent coûter cher pour cette raison.
+
+![Schéma coût input vs output tokens](https://albanlorillard.github.io/slides/ia-fete-terminee/schema_io_token.png)
+
+Pour donner un ordre de grandeur (il s'agit ici des tarifs en facturation directe via l'API Anthropic, pas des prix Copilot) : Claude Sonnet 4.6 se facture **3 $ / million de tokens en entrée** et **15 $ / million en sortie** ; Claude Opus 4.7 monte à **5 $ / million en entrée** et **25 $ / million en sortie**. Les tokens de sortie coûtent donc environ 5 fois plus cher que les tokens d'entrée. Ce ratio est un repère utile pour comprendre où se concentrent les coûts, même si les montants réels varient selon votre contrat Copilot.
 
 ### Les tokens et le cache
 
@@ -116,9 +118,13 @@ Voici un exemple :
 
 Dès que vous le modifiez, gardez en tête le ratio : « Ce que ça va me coûter à chaque requête » vs « Le bénéfice sur un grand nombre de sessions ».
 
+#### Instructions locales et spécifiques
+
+En complément de l'instruction globale, la plupart des outils permettent de définir des instructions locales, spécifiques à un projet (`.github/copilot-instructions.md`, `.clauderules`…). Elles sont chargées uniquement lorsque l'outil est ouvert dans le dossier concerné — ce qui les rend plus ciblées. Mais attention : elles sont toutes injectées dans le prompt système, tout comme l'instruction globale. Le risque est de les laisser s'accumuler et de surcharger inutilement le contexte. Règle d'or : restez extrêmement concis, et ne conservez que ce qui est strictement nécessaire au projet en question.
+
 ### 3 — Optimiser les outputs avec Caveman
 
-[Caveman](https://github.com/JuliusBrussee/caveman) fonctionne sous forme d'une skill utilisable avec n'importe quel outil IA. Il transforme vos phrases en outputs plus ou moins condensés. Il existe plusieurs modes : « full », « ultra ». Comme on a vu précédemment que l’historique de conversation était envoyé à chaque fois, cela permet donc d’optimiser votre contexte à chaque échange.
+[Caveman](https://github.com/JuliusBrussee/caveman) fonctionne sous forme d'une skill utilisable avec n'importe quel outil IA. Il transforme vos phrases en outputs plus ou moins condensés. Il existe plusieurs modes : « lite », « full », « ultra ». Comme on a vu précédemment que l’historique de conversation était envoyé à chaque fois, cela permet donc d’optimiser votre contexte à chaque échange. Le gain estimé est d’environ **75 % de tokens en moins sur les sorties** en mode full ou ultra.
 
 ![https://github.com/JuliusBrussee/caveman](https://miro.medium.com/v2/resize:fit:1400/1*79D2eCndvJTl8xMfn0krww.png)
 
@@ -128,14 +134,14 @@ Vous réglez donc la graduation, si vous utilisez le mode ultra, les réponses s
 
 C’est du bon sens, mais n’utilisez pas les modèles les plus puissants (Claude Opus en « High », GPT-5 en « Extra-High »…) pour tout et n’importe quoi. 
 
-Claude Sonnet, souvent considéré comme le bon équilibre, peut lui aussi être excessif selon le besoin. Ne négligez pas les modèles légers — Gemini Flash, Claude Haiku, GPT-mini — pour les tâches simples.
+Claude Sonnet, souvent considéré comme le bon équilibre, peut lui aussi être excessif selon le besoin. Ne négligez pas les modèles légers — Gemini Flash, Claude Haiku 4.5, GPT-5.4 mini — pour les tâches simples.
 
 #### Abusez des modèles légers.
-Personnellement, mon terminal a toujours un onglet OpenCode ouvert sur Gemini Flash (en mode Low ou Medium), nommé « Q&A » (questions & réponses), pour des questions simples, d’ordre général, ou pour des tâches sans complexité. Si votre prompt est précis, concis, délimité, sans fioriture et sans contexte externe (c’est-à-dire que vous ne demandez pas à l’agent d’aller chercher du contexte en dehors de votre prompt), vous disposez d’une solution quasi gratuite. Comme ce sont des modèles moins performants, n’hésitez pas à démarrer une nouvelle session (/new) pour chaque nouvelle question ou tâche.
+Personnellement, mon terminal a toujours un onglet OpenCode ouvert sur Gemini 3 Flash (en mode Low ou Medium), nommé « Q&A » (questions & réponses), pour des questions simples, d’ordre général, ou pour des tâches sans complexité. Si votre prompt est précis, concis, délimité, sans fioriture et sans contexte externe (c’est-à-dire que vous ne demandez pas à l’agent d’aller chercher du contexte en dehors de votre prompt), vous disposez d’une solution quasi gratuite. Comme ce sont des modèles moins performants, n’hésitez pas à démarrer une nouvelle session (/new) pour chaque nouvelle question ou tâche.
 
 #### Méthodologie Architecte/Développeur**
 
-À l’opposé, et contre-intuitivement, il vaut parfois mieux utiliser Claude Opus 4.6 pour préparer un plan précis lorsque la tâche est complexe et nécessite une bonne analyse du code (plusieurs fichiers à lire), plutôt que de partir directement avec Claude Sonnet et devoir le corriger à tout bout de champ. Une fois le plan établi, vous pouvez redescendre sur un modèle moins coûteux. C’est la stratégie de l’architecte (Opus) et du développeur exécutant (Sonnet).
+À l’opposé, et contre-intuitivement, il vaut parfois mieux utiliser Claude Opus 4.6 pour préparer un plan précis lorsque la tâche est complexe et nécessite une bonne analyse du code (plusieurs fichiers à lire), plutôt que de partir directement avec Claude Sonnet et devoir le corriger à tout bout de champ. Une fois le plan établi, vous pouvez redescendre sur un modèle moins coûteux. C’est la stratégie de l’architecte (Opus 4.6) et du développeur exécutant (Sonnet 4.6 / GPT-5.4).
 
 L’objectif est d’éviter d’utiliser un modèle sous-performant dés le début, ce qui risquerait de vous entraîner dans un **biais de rétroaction** : devoir corriger après conception le code produit par l’IA. « Au fait, tu as fait ça, mais je préfère que ce soit comme ça. » Chaque requête corrective augmente le contexte en entrée, génère de nouveaux tokens de sortie, entraîne parfois des compressions (qui coûtent aussi), et vous voilà dans une boucle feedback / implémentation qui peut s’avérer coûteuse in fine.
 
@@ -165,7 +171,7 @@ Le rapport peut atteindre ×10 entre les tokens de sortie facturés en « Low »
 
 Je vous conseille [cet article de MindStudio](https://www.mindstudio.ai/blog/claude-code-effort-levels-explained), qui vous aide à choisir le bon niveau d’effort et à détecter quand changer de variant.
 
-### 6 — Des MCPs : oui, quand c'est nécessaire — et pas tous activés en même temps
+### 6 — Des MCPs et skills : oui, quand c’est nécessaire — et pas tous activés en même temps
 
 Vos tokens d’entrée contiennent une partie « system prompt », envoyée à chaque message. Ce system prompt inclut le catalogue de vos MCPs avec leurs descriptions, leurs paramètres attendus… Plus vous avez d’outils activés, plus cette partie fixe sera volumineuse.
 
@@ -175,6 +181,8 @@ Pour désactiver :
 
 - Sur Opencode : `/mcps` puis espace sur les mcps
 - Sur Copilot CLI : `/mcp disable <service>`
+
+La même logique s’applique aux **skills**. Les instructions d’une skill sont injectées dans le prompt système dès qu’elle est activée, et consomment des tokens à chaque tour de conversation. Désactivez les skills dont vous n’avez plus besoin (« `/skills` » puis `/new` pour démarrer une session propre). Ne gardez actives que celles qui servent la tâche en cours.
 
 L’usage judicieux des MCPs reste bien sûr bénéfique lorsqu’il est justifié : l’agent évitera, par exemple, de récupérer une page entière et de recevoir un dump HTML pour en extraire une information, si un MCP la fournit directement, de manière concise et structurée.
 
@@ -208,9 +216,29 @@ Sachez également que vous pouvez désactiver la compression automatique sur Ope
   }
 }
 ```
+Deux outils utiles pour gérer ses sessions :
+
+- **`/resume`** : permet de reprendre n’importe quelle session passée là où vous l’avez laissée, y compris tous les checkpoints créés.
+- **Sous-agents (Task)** : déléguez l’exploration « sale » (lecture de fichiers, grep, contexte) à un sous-agent. Seule sa synthèse est réinjectée dans votre historique principal, ce qui préserve le contexte de votre session maîtresse.
+
 Pour allez plus loin, [la doc copilot sur le context management](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/context-management#using-long-running-sessions) donne son point de vue sur quand démarrer une nouvelle session, quand réutiliser.
 
-### 8 — Utiliser du texte plutôt que des médias
+### 8 — Faites des prompts précis
+
+Moins vous donnez de détails, plus l’IA doit tâtonner avec ses outils, multipliant les requêtes et donc les tokens consommés. Un prompt vague force l’agent à enchaîner des `grep`, `ls` ou lectures de fichiers inutiles pour récupérer le contexte qu’il n’a pas.
+
+Quelques réflexes simples :
+
+- Donnez le **chemin exact** du fichier concerné.
+- Spécifiez la **ligne de début** ou le nom de la fonction.
+- Décrivez l’état final attendu pour éviter les allers-retours.
+
+> ❌ Mauvais : « Fix le bug dans le header »  
+> ✅ Bon : « Dans `src/components/Header.tsx`, ligne 42, remplace la condition `isLoading` par `isPending` »
+
+L’impact est double : moins d’appels d’outils = moins de tokens injectés dans l’historique, et une réponse plus directe = moins de tokens de sortie.
+
+### 9 — Utiliser du texte plutôt que des médias
 
 Sans trop s'étendre : le texte sera toujours plus économique et plus précis qu'une image. Si vous êtes dans la vibe du « Mouth Coding » (coder à la voix), utilisez d'abord un outil de speech-to-text local comme [Handy](https://github.com/handy-ai/handy). Pour développer une maquette, préférez un MCP dédié (MCP Figma, par exemple) qu'une image dans le prompt.
 
